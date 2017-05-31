@@ -27,10 +27,6 @@ rrrreplace.php
 /wflogs/
 /wp-cache-config.php
 
-# pro plugins
-/plugins/advanced-custom-fields-pro/*
-/plugins/wp-migrate-db-pro/*
-
 # wp core (as of 3.4.1)
 /index.php
 /themes/twentyten
