@@ -1,0 +1,240 @@
+//
+// Header
+// --------------------------------------------------
+
+header{
+	//.make-row();
+	background: @bg-header;
+	margin-bottom: 15px;
+
+	&.navbar{
+		margin-bottom: 0px;
+		min-height: 60px;
+
+		@media(min-width: @screen-sm-min) {
+			min-height: 111px;
+			
+		}
+	}
+	.container{
+		.navbar-header{
+			width: 100%;
+		
+
+			@media(min-width: @screen-sm-min) {
+				
+			}
+			@media(min-width: @screen-md-min) {
+			
+			}
+			@media(min-width: @screen-lg-min) {
+				
+			}
+			.navbar-brand{
+				.make-xs-column(4);
+				.make-sm-column(3);
+				height: auto;
+				padding-top: 10px;
+				padding-bottom: 10px;
+				margin-left: 0px;
+
+				@media(min-width: @screen-sm-min) {
+					padding-top: 10px;
+					padding-bottom: 10px;
+					
+				}
+				@media(min-width: @screen-md-min) {
+				
+				}
+				@media(min-width: @screen-lg-min) {
+					
+				}
+
+				a{
+					width: 100%;
+				}
+				img{
+					width: 100%;
+				}
+			}
+
+			.nav-top{
+				.make-sm-column(9);
+				.hidden-xs;
+				margin-top: 30px;
+				margin-bottom: 28px;
+
+				@media(min-width: @screen-sm-min) {
+					margin-top: 15px;
+					margin-bottom: 15px;
+				}
+				@media(min-width: @screen-md-min) {
+					margin-top: 20px;
+					margin-bottom: 22px;
+				}
+				@media(min-width: @screen-lg-min) {
+					margin-top: 30px;
+					margin-bottom: 28px;
+				}
+
+				ul.nav-right-studio{
+					.inline-list();
+					padding:0px;
+					text-align: right;
+					font-family: @font-family-studio;
+					margin-right: 20px;
+					float: right;
+					margin-bottom: 0px;
+					margin-top: 6px;
+					li{
+						color:@gray;
+						font-size: 1.13em;
+
+						@media(min-width: @screen-sm-min) {
+							font-size: 1em;
+						}
+						@media(min-width: @screen-md-min) {
+							font-size: 1em;
+						}
+						@media(min-width: @screen-lg-min) {
+							font-size: 1.13em;
+						}
+						
+						a{
+							color:@gray;
+							padding-left:10px;
+							padding-right: 10px;
+							text-transform: uppercase;
+							font-weight: bold;
+							border-right: 2px solid @gray;
+							font-family: inherit;
+							.transition(all ease 0.5s);
+							&:hover{
+								opacity: 0.7;
+							}
+						}
+						&:last-child{
+							a{
+								border-right: none;
+							}
+						}
+					}
+				}
+				ul.nav-right-social{
+					.inline-list();
+					padding:0px;
+					text-align: right;
+					float: right;
+					margin-bottom: 0px;
+
+					li{
+						margin-right: 10px;
+						float: left;
+
+						a.icon-facebook{
+							background: url("img/icon-facebook.png") no-repeat top;
+							background-size: 100%;
+							width: 37px;
+							height: 34px;
+							display: block;
+
+							@media(min-width: @screen-sm-min) {
+								width: 30px;
+								height: 28px;
+								
+							}
+							@media(min-width: @screen-md-min) {
+								width: 37px;
+								height: 34px;
+								
+							}
+							@media(min-width: @screen-lg-min) {
+								width: 37px;
+								height: 34px;
+							}
+						}
+						a.icon-twitter{
+							background: url("img/icon-twitter.png") no-repeat top;
+							background-size: 100%;
+							width: 35px;
+							height: 34px;
+							display: block;
+							@media(min-width: @screen-sm-min) {
+								width: 29px;
+								height: 28px;
+								
+							}
+							@media(min-width: @screen-md-min) {
+								width: 35px;
+								height: 34px;
+								
+							}
+							@media(min-width: @screen-lg-min) {
+								width: 35px;
+								height: 34px;
+							}
+						}
+						a.icon-instagram{
+							background: url("img/icon-instagram.png") no-repeat top;
+							background-size: 100%;
+							width: 34px;
+							height: 34px;
+							display: block;
+
+							@media(min-width: @screen-sm-min) {
+								width: 28px;
+								height: 28px;	
+							}
+							@media(min-width: @screen-md-min) {
+								width: 34px;
+								height: 34px;	
+							}
+							@media(min-width: @screen-lg-min) {
+								width: 34px;
+								height: 34px;
+							}
+						}
+						&:last-child{
+							margin-right: 0px;
+						}
+						&:hover{
+							opacity: 0.7;
+						}
+					}
+				}
+			}
+			.nav-top-collapse{
+				.make-sm-column(9);
+				padding-right: 15px;
+				@media(min-width: @screen-sm-min) {
+					padding-right: 0px;
+				}
+				ul{
+					width: 100%;
+					.inline-list();
+					li{
+						width: 100%;
+						margin-bottom: 15px;
+						@media(min-width: @screen-sm-min) {
+							width: auto;
+							margin-bottom: 0px;
+						}
+						&:last-child{
+							margin-bottom: 0px;
+						}
+						
+					}
+				}
+			}
+		}
+	}	
+}
+
+.navbar-toggle{
+	margin-top: 10px;
+	margin-right: 0px;
+	.icon-bar {
+		background:@black; 
+	}
+} 
+

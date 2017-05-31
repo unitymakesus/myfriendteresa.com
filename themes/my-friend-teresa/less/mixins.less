@@ -1,0 +1,77 @@
+//
+// Mixins
+// --------------------------------------------------
+
+
+//<ul> <li> Inline lists
+.inline-list{
+	list-style-type: none;
+	li{
+		display: inline-block;
+	}
+}
+
+
+//Input placeholder
+.placeholder(@color){
+	&::-webkit-input-placeholder {
+	   color: @color;
+	   text-transform: uppercase;
+	}
+	&:-moz-placeholder { /* Firefox 18- */
+	   color: @color;
+	   text-transform: uppercase; 
+	}
+	&::-moz-placeholder {  /* Firefox 19+ */
+	   color: @color;
+	   text-transform: uppercase;  
+	}
+	&:-ms-input-placeholder {  
+	   color: @color;
+	   text-transform: uppercase; 
+	}
+}
+
+.white-glow{
+	-moz-box-shadow:    3px 3px 5px 6px @white;
+	-webkit-box-shadow: 3px 3px 5px 6px @white;
+	box-shadow:         3px 3px 5px 6px @white;
+}
+
+.vertical-align {
+  position: relative;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+
+.about-area{
+	padding-top:30px;
+	padding-bottom: 30px;
+	margin-bottom: 15px;
+	h4{
+		font-size: 1.1em;
+		text-transform: uppercase;
+		color: @gray;
+		font-weight: 700;
+		margin:0 0 15px 0;
+	}
+}
+
+//Buttons MED with image icons
+.btn-icon(@image-url){
+	&:before{
+		background: url(@image-url) no-repeat top left;
+		content: '';
+		height: 21px;
+		width: 23px;
+		position: absolute;
+		left: 15px;
+		top:10px;
+	}
+}
+
+
+
+

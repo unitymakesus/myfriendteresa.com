@@ -1,0 +1,76 @@
+//
+// Forms
+// --------------------------------------------------
+
+input[type="text"],input[type="password"],input[type="email"], textarea,select{
+	font-family: @font-family-base;
+	color:@black;
+	border-radius: 0px;
+	border:1px solid @gray-light;
+	.placeholder(@gray);
+	font-size: 0.93em;
+
+	&.form-control{
+		border-radius: 0px;
+		outline: 0;
+		&:focus{
+			border:1px solid @gray-light;
+			border-bottom: 2px solid @black;
+			box-shadow: none;
+		}
+	}
+	&:focus{
+		border:1px solid @gray-light;
+		border-bottom: 2px solid @black;
+		box-shadow: none;
+	}
+}
+
+.form-group{
+	position: relative;
+	&.half{
+		.make-xs-column(6);
+		padding-left: 0;
+	}
+	&.full{
+		.make-xs-column(12);
+		padding-left: 0;
+	}
+
+	&.has-error{
+		input,textarea,select{
+			&:focus{
+				border-bottom: 2px solid @brand-primary;
+			}
+		}
+	}
+	.error-block{
+		font-family: @font-family-base;
+		width: 100%;
+		float: left;
+		font-size: 0.7em;
+		color:@brand-primary;
+		position: absolute;
+		bottom: -15px;
+	}
+}
+
+.spacing{
+	margin:15px 0px;
+}
+
+.styled-select select.form-control{
+   background: transparent;
+   width: 100%;
+   height: 34px;
+
+   -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+   }
+
+.styled-select{
+	overflow: hidden;
+   	background:url("../../src/less/img/select-arrow.png") no-repeat right @white;
+	
+}

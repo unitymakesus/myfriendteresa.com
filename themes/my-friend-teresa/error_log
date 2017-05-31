@@ -1,0 +1,4 @@
+[03-Feb-2017 19:49:33 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function get_header() in /home/myfriendteresa/public_html/wp-content/themes/my-friend-teresa/index.php:1
+Stack trace:
+#0 {main}
+  thrown in /home/myfriendteresa/public_html/wp-content/themes/my-friend-teresa/index.php on line 1

@@ -1,0 +1,65 @@
+//
+// Buttons
+// --------------------------------------------------
+
+.btn{
+	border-radius: 0px;
+	cursor: pointer;
+}
+
+.btn-sm{
+	text-transform: uppercase;
+	padding:3px 12px;
+	font-size: 1em;
+	font-family: @font-family-base;
+	line-height: none;
+}
+
+.btn-md{
+	text-transform: uppercase;
+	padding:10px 20px 8px;
+	font-size: 1.33em;
+	font-family: @font-family-base;
+	line-height: 1.3em;
+}
+
+.btn-lg{
+	text-transform: uppercase;
+	padding:12px 10px;
+	font-size: 1.13em;
+	font-family: @font-family-base;
+}
+
+.btn-forms{
+	padding:10px 40px 8px;
+
+}
+
+.btn-primary {
+   .button-variant(@btn-primary-color; @btn-primary-bg; @btn-primary-border);
+   .transition(background 0.5s ease);
+   text-shadow: 2px 2px 1px @black;
+}
+
+.btn-secundary {
+   .button-variant(@btn-secundary-color; @btn-secundary-bg; @btn-secundary-border);
+   .transition(background 0.5s ease);
+   text-shadow:none;
+}
+
+.btn-terciary {
+   .button-variant(@btn-terciary-color; @btn-terciary-bg; @btn-terciary-border);
+   .transition(background 0.5s ease);
+   text-shadow:none;
+}
+
+.btn-cart{
+	position: relative;
+	padding-left:45px;
+	.btn-icon("../../src/less/img/icon-cart-white.png");
+}
+
+.btn-column{
+	width: 100%;
+	text-align: center;
+}
