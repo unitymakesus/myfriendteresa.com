@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2014-2016 ServMask Inc.
+ * Copyright (C) 2014-2017 ServMask Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,12 +35,18 @@ class Ai1wm_File_Webconfig {
 	 */
 	public static function create( $path ) {
 		$contents = "<configuration>\n" .
-					"<system.webServer>\n" .
-					"<staticContent>\n" .
-					"<mimeMap fileExtension=\".wpress\" mimeType=\"application/octet-stream\" />\n" .
-					"</staticContent>\n" .
-					"</system.webServer>\n" .
-					"</configuration>";
+						"<system.webServer>\n" .
+							"<staticContent>\n" .
+								"<mimeMap fileExtension=\".wpress\" mimeType=\"application/octet-stream\" />\n" .
+							"</staticContent>\n" .
+							"<defaultDocument>\n" .
+								"<files>\n" .
+									"<add value=\"index.php\" />\n" .
+								"</files>\n" .
+							"</defaultDocument>\n" .
+							"<directoryBrowse enabled=\"false\" />\n" .
+						"</system.webServer>\n" .
+					"</configuration>\n";
 
 		return Ai1wm_File::create( $path, $contents );
 	}

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2014-2016 ServMask Inc.
+ * Copyright (C) 2014-2017 ServMask Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,9 +35,12 @@ class Ai1wm_Import_Controller {
 		// Set error handler
 		@set_error_handler( 'Ai1wm_Handler::error' );
 
+		// Set shutdown handler
+		@register_shutdown_function( 'Ai1wm_Handler::shutdown' );
+
 		// Set params
 		if ( empty( $params ) ) {
-			$params = ai1wm_urldecode( $_REQUEST );
+			$params = stripslashes_deep( $_REQUEST );
 		}
 
 		// Set priority
@@ -52,12 +55,11 @@ class Ai1wm_Import_Controller {
 			$secret_key = $params['secret_key'];
 		}
 
-		// Verify secret key by using the value in the database, not in cache
-		if ( $secret_key !== get_option( AI1WM_SECRET_KEY ) ) {
-			Ai1wm_Status::error(
-				sprintf( __( 'Unable to authenticate your request with secret_key = "%s"', AI1WM_PLUGIN_NAME ), $secret_key ),
-				__( 'Unable to import', AI1WM_PLUGIN_NAME )
-			);
+		try {
+			// Ensure that unauthorized people cannot access import action
+			ai1wm_verify_secret_key( $secret_key );
+		} catch ( Ai1wm_Not_Valid_Secret_Key_Exception $e ) {
+			Ai1wm_Log::error( $e->getMessage() );
 			exit;
 		}
 
@@ -65,8 +67,8 @@ class Ai1wm_Import_Controller {
 		if ( isset( $wp_filter['ai1wm_import'] ) && ( $filters = $wp_filter['ai1wm_import'] ) ) {
 			// WordPress 4.7 introduces new class for working with filters/actions called WP_Hook
 			// which adds another level of abstraction and we need to address it.
-			if ( is_object( $filters ) ) {
-				$filters = current( $filters );
+			if ( isset( $filters->callbacks ) ) {
+				$filters = $filters->callbacks;
 			}
 
 			ksort( $filters );
@@ -85,10 +87,10 @@ class Ai1wm_Import_Controller {
 
 						} catch ( Ai1wm_Import_Retry_Exception $e ) {
 							status_header( $e->getCode() );
-							echo json_encode( array( 'message' => $e->getMessage() ) );
+							echo json_encode( array( 'errors' => array( array( 'code' => $e->getCode(), 'message' => $e->getMessage() ) ) ) );
 							exit;
 						} catch ( Exception $e ) {
-							Ai1wm_Status::error( $e->getMessage(), __( 'Unable to import', AI1WM_PLUGIN_NAME ) );
+							Ai1wm_Status::error( $e->getMessage() );
 							exit;
 						}
 					}

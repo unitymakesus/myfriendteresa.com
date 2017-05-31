@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2014-2016 ServMask Inc.
+ * Copyright (C) 2014-2017 ServMask Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,18 +51,18 @@ class Ai1wm_Import_Content {
 			$archive_offset = 0;
 		}
 
-		// Get total files
-		if ( isset( $params['total_files'] ) ) {
-			$total_files = (int) $params['total_files'];
+		// Get total files count
+		if ( isset( $params['total_files_count'] ) ) {
+			$total_files_count = (int) $params['total_files_count'];
 		} else {
-			$total_files = 1;
+			$total_files_count = 1;
 		}
 
-		// Get total size
-		if ( isset( $params['total_size'] ) ) {
-			$total_size = (int) $params['total_size'];
+		// Get total files size
+		if ( isset( $params['total_files_size'] ) ) {
+			$total_files_size = (int) $params['total_files_size'];
 		} else {
-			$total_size = 1;
+			$total_files_size = 1;
 		}
 
 		// Get processed files
@@ -73,11 +73,11 @@ class Ai1wm_Import_Content {
 		}
 
 		// What percent of files have we processed?
-		$progress = (int) ( ( $processed / $total_size ) * 100 );
+		$progress = (int) ( ( $processed / $total_files_size ) * 100 );
 
 		// Set progress
 		if ( empty( $content_offset ) ) {
-			Ai1wm_Status::info( sprintf( __( 'Restoring %d files...<br />%d%% complete', AI1WM_PLUGIN_NAME ), $total_files, $progress ) );
+			Ai1wm_Status::info( sprintf( __( 'Restoring %d files...<br />%d%% complete', AI1WM_PLUGIN_NAME ), $total_files_count, $progress ) );
 		}
 
 		// Start time
@@ -157,11 +157,11 @@ class Ai1wm_Import_Content {
 
 					// What percent of files have we processed?
 					if ( ( $processed += ( $current_offset - $content_offset ) ) ) {
-						$progress = (int) ( ( $processed / $total_size ) * 100 );
+						$progress = (int) ( ( $processed / $total_files_size ) * 100 );
 					}
 
 					// Set progress
-					Ai1wm_Status::info( sprintf( __( 'Restoring %d files...<br />%d%% complete', AI1WM_PLUGIN_NAME ), $total_files, $progress ) );
+					Ai1wm_Status::info( sprintf( __( 'Restoring %d files...<br />%d%% complete', AI1WM_PLUGIN_NAME ), $total_files_count, $progress ) );
 
 					// Set content offset
 					$content_offset = $current_offset;

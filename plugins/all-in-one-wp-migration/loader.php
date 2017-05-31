@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2014-2016 ServMask Inc.
+ * Copyright (C) 2014-2017 ServMask Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -154,6 +154,12 @@ require_once AI1WM_VENDOR_PATH .
 			DIRECTORY_SEPARATOR .
 			'class-ai1wm-database-utility.php';
 
+require_once AI1WM_VENDOR_PATH .
+			DIRECTORY_SEPARATOR .
+			'math' .
+			DIRECTORY_SEPARATOR .
+			'BigInteger.php';
+
 require_once AI1WM_CONTROLLER_PATH .
 			DIRECTORY_SEPARATOR .
 			'class-ai1wm-main-controller.php';
@@ -264,7 +270,7 @@ require_once AI1WM_IMPORT_PATH .
 
 require_once AI1WM_IMPORT_PATH .
 			DIRECTORY_SEPARATOR .
-			'class-ai1wm-import-plugins.php';
+			'class-ai1wm-import-mu-plugins.php';
 
 require_once AI1WM_IMPORT_PATH .
 			DIRECTORY_SEPARATOR .

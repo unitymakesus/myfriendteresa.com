@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2014-2016 ServMask Inc.
+ * Copyright (C) 2014-2017 ServMask Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,13 +38,18 @@ class Ai1wm_Backups_Controller {
 		);
 	}
 
-	public static function delete() {
+	public static function delete( $params = array() ) {
 		$response = array( 'errors' => array() );
+
+		// Set params
+		if ( empty( $params ) ) {
+			$params = stripslashes_deep( $_POST );
+		}
 
 		// Set archive
 		$archive = null;
-		if ( isset( $_POST['archive'] ) ) {
-			$archive = trim( $_POST['archive'] );
+		if ( isset( $params['archive'] ) ) {
+			$archive = trim( $params['archive'] );
 		}
 
 		$model = new Ai1wm_Backups;

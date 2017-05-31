@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2014-2016 ServMask Inc.
+ * Copyright (C) 2014-2017 ServMask Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ define( 'AI1WM_DEBUG', false );
 // ==================
 // = Plugin Version =
 // ==================
-define( 'AI1WM_VERSION', '6.39' );
+define( 'AI1WM_VERSION', '6.47' );
 
 // ===============
 // = Plugin Name =
@@ -123,6 +123,11 @@ define( 'AI1WM_ARCHIVE_TOOLS_URL', 'https://servmask.com/archive/tools' );
 // =========================
 define( 'AI1WM_TABLE_PREFIX', 'SERVMASK_PREFIX_' );
 
+// ========================
+// = Archive Backups Name =
+// ========================
+define( 'AI1WM_BACKUPS_NAME', 'ai1wm-backups' );
+
 // =========================
 // = Archive Database Name =
 // =========================
@@ -203,10 +208,25 @@ define( 'AI1WM_ACTIVE_PLUGINS', 'active_plugins' );
 // ===========================
 define( 'AI1WM_ACTIVE_SITEWIDE_PLUGINS', 'active_sitewide_plugins' );
 
+// ==========================
+// = Jetpack Active Modules =
+// ==========================
+define( 'AI1WM_JETPACK_ACTIVE_MODULES', 'jetpack_active_modules' );
+
 // ======================
 // = MS Files Rewriting =
 // ======================
 define( 'AI1WM_MS_FILES_REWRITING', 'ms_files_rewriting' );
+
+// ===================
+// = Active Template =
+// ===================
+define( 'AI1WM_ACTIVE_TEMPLATE', 'template' );
+
+// =====================
+// = Active Stylesheet =
+// =====================
+define( 'AI1WM_ACTIVE_STYLESHEET', 'stylesheet' );
 
 // ===============
 // = Updater Key =
