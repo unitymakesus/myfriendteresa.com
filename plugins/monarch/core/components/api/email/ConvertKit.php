@@ -22,6 +22,11 @@ class ET_Core_API_Email_ConvertKit extends ET_Core_API_Email_Provider {
 	/**
 	 * @inheritDoc
 	 */
+	public $name_field_only = true;
+
+	/**
+	 * @inheritDoc
+	 */
 	public $slug = 'convertkit';
 
 	/**
@@ -166,6 +171,8 @@ class ET_Core_API_Email_ConvertKit extends ET_Core_API_Email_Provider {
 		$url = $this->_generate_url_for_request( $this->_get_subscribe_url( $args['list_id'] ) );
 		$params = $this->transform_data_to_provider_format( $args, 'subscriber' );
 		$params['fields']['notes'] = $this->SUBSCRIBED_VIA;
+
+		$this->prepare_request( $url, 'POST', false, $params );
 
 		return parent::subscribe( $params, $url );
 	}

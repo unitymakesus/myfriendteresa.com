@@ -540,7 +540,11 @@ class MMB_Stats extends MMB_Core
         }
 
         $uploadDirArray                 = wp_upload_dir();
-        $stats['uploads_relative_path'] = $fs->makePathRelative($uploadDirArray['basedir'], ABSPATH);
+        if (false === $uploadDir = realpath($uploadDirArray['basedir'])) {
+            $uploadDir = $uploadDirArray['basedir'];
+        }
+
+        $stats['uploads_relative_path'] = $fs->makePathRelative($uploadDir, ABSPATH);
 
         $stats['writable']  = $this->is_server_writable();
         $stats['fs_method'] = !$this->check_if_pantheon() ? get_filesystem_method() : '';
@@ -572,13 +576,13 @@ class MMB_Stats extends MMB_Core
         $user_blogs    = get_blogs_of_user($current_user->ID);
         $network_blogs = $wpdb->get_results("select `blog_id`, `site_id` from `{$wpdb->blogs}`");
         $user_id       = !empty($GLOBALS['mwp_user_id']) ? $GLOBALS['mwp_user_id'] : false;
-
-        $stats = array();
+        $mainBlogId    = defined('BLOG_ID_CURRENT_SITE') ? BLOG_ID_CURRENT_SITE : false;
+        $stats         = array();
 
         if ($this->network_admin_install == '1' && is_super_admin($user_id)) {
             if (!empty($network_blogs)) {
                 foreach ($network_blogs as $details) {
-                    if ($details->site_id == $details->blog_id) {
+                    if (($mainBlogId !== false && $details->blog_id == $mainBlogId) || ($mainBlogId === false && $details->site_id == $details->blog_id)) {
                         continue;
                     } else {
                         $data = get_blog_details($details->blog_id);

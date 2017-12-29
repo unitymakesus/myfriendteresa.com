@@ -105,7 +105,7 @@ class MMB_Installer extends MMB_Core
             );
         }
 
-        if (!empty($activate) && defined('WP_ADMIN') && WP_ADMIN) {
+        if (defined('WP_ADMIN') && WP_ADMIN) {
             global $wp_current_filter;
             $wp_current_filter[] = 'load-update-core.php';
 
@@ -163,23 +163,25 @@ class MMB_Installer extends MMB_Core
 
                 $wp_themes = null;
                 unset($wp_themes); //prevent theme data caching
-                if (function_exists('wp_get_themes')) {
-                    $all_themes = wp_get_themes();
-                    foreach ($all_themes as $theme_name => $theme_data) {
-                        foreach ($install_info as $key => $install) {
-                            if (!$install || is_wp_error($install)) {
-                                continue;
-                            }
-
-                            if ($theme_data->Template == $install['destination_name']) {
-                                $wrongFileType = false;
-                                if ($activate) {
-                                    $install_info[$key]['activated'] = switch_theme($theme_data->Template, $theme_data->Stylesheet);
-                                }
-                                $install_info[$key]['full_name'] = $theme_data->name;
-                                $install_info[$key]['version']   = $theme_data->version;
-                            }
+                if (function_exists('wp_get_theme')) {
+                    foreach ($install_info as $key => $install) {
+                        if (!$install || is_wp_error($install)) {
+                            continue;
                         }
+
+                        $theme = wp_get_theme($install['destination_name']);
+                        if ($theme->errors() !== false) {
+                            $install_info[$key] = $theme->errors();
+                            continue;
+                        }
+
+                        $wrongFileType = false;
+                        if ($activate) {
+                            $install_info[$key]['activated'] = switch_theme($theme->Template, $theme->Stylesheet);
+                        }
+
+                        $install_info[$key]['full_name'] = $theme->name;
+                        $install_info[$key]['version']   = $theme->version;
                     }
                 } else {
                     $all_themes = get_themes();
@@ -189,7 +191,7 @@ class MMB_Installer extends MMB_Core
                                 continue;
                             }
 
-                            if ($theme_data['Template'] == $install['destination_name']) {
+                            if ($theme_data['Template'] == $install['destination_name'] || $theme_data['Stylesheet'] == $install['destination_name']) {
                                 $wrongFileType = false;
                                 if ($activate) {
                                     $install_info[$key]['activated'] = switch_theme($theme_data['Template'], $theme_data['Stylesheet']);
@@ -280,6 +282,11 @@ class MMB_Installer extends MMB_Core
             $plugin_files = array();
             $this->ithemes_updater_compatiblity();
             foreach ($upgrade_plugins as $plugin) {
+                if (isset($plugin['envatoPlugin']) && $plugin['envatoPlugin'] === true) {
+                    $upgrades['plugins'] = $this->upgrade_envato_component($plugin);
+                    continue;
+                }
+
                 if (isset($plugin['file'])) {
                     $plugin_files[$plugin['file']] = $plugin['old_version'];
                 } else {
@@ -295,6 +302,11 @@ class MMB_Installer extends MMB_Core
         if (!empty($upgrade_themes)) {
             $theme_temps = array();
             foreach ($upgrade_themes as $theme) {
+                if (isset($theme['envatoTheme']) && $theme['envatoTheme'] === true) {
+                    $upgrades['themes'] = $this->upgrade_envato_component($theme);
+                    continue;
+                }
+
                 if (isset($theme['theme_tmp'])) {
                     $theme_temps[] = $theme['theme_tmp'];
                 } else {
@@ -315,6 +327,36 @@ class MMB_Installer extends MMB_Core
         $this->mmb_maintenance_mode(false);
 
         return $upgrades;
+    }
+
+    /**
+     * @param array $component
+     *
+     * @return array
+     */
+    private function upgrade_envato_component(array $component)
+    {
+        $result = $this->install_remote_file($component);
+        $return = array();
+
+        if (empty($result)) {
+            return array(
+                'error' => 'Upgrade failed.',
+            );
+        }
+
+        foreach ($result as $component_slug => $component_info) {
+            if (!$component_info || is_wp_error($component_info)) {
+                $return[$component_slug] = $this->mmb_get_error($component_info);
+                continue;
+            }
+
+            $return[$component_info['destination_name']] = 1;
+        }
+
+        return array(
+            'upgraded' => $return,
+        );
     }
 
     /**
@@ -531,7 +573,8 @@ class MMB_Installer extends MMB_Core
                 }
 
                 return array(
-                    'upgraded' => $return,
+                    'upgraded'           => $return,
+                    'additional_updates' => $this->get_additional_plugin_updates($result),
                 );
             } else {
                 return array(
@@ -543,6 +586,39 @@ class MMB_Installer extends MMB_Core
                 'error' => 'WordPress update required first.',
             );
         }
+    }
+
+    private function get_additional_plugin_updates($plugin_upgrades)
+    {
+        if (empty($plugin_upgrades)) {
+            return array();
+        }
+
+        $additional_updates = array();
+
+        if (array_key_exists('woocommerce/woocommerce.php', $plugin_upgrades) && is_plugin_active('woocommerce/woocommerce.php') && $this->has_woocommerce_db_update()) {
+            $additional_updates['woocommerce/woocommerce.php'] = 1;
+        }
+
+        return $additional_updates;
+    }
+
+    private function has_woocommerce_db_update()
+    {
+        $current_db_version = get_option('woocommerce_db_version', null);
+        $current_wc_version = get_option('woocommerce_version');
+        if (version_compare($current_wc_version, '3.0.0', '<')) {
+            return true;
+        }
+
+        if (!is_callable('WC_Install::get_db_update_callbacks')) {
+            return false;
+        }
+
+        /** @handled static */
+        $updates = WC_Install::get_db_update_callbacks();
+
+        return !is_null($current_db_version) && version_compare($current_db_version, max(array_keys($updates)), '<');
     }
 
     public function upgrade_themes($themes = false)
@@ -562,7 +638,7 @@ class MMB_Installer extends MMB_Core
             $upgrader = new Theme_Upgrader(mwp_container()->getUpdaterSkin());
             $result   = $upgrader->bulk_upgrade($themes);
 
-            $return  = array();
+            $return = array();
             if (!empty($result)) {
                 foreach ($result as $theme_tmp => $theme_info) {
                     if (is_wp_error($theme_info) || empty($theme_info)) {
@@ -595,14 +671,17 @@ class MMB_Installer extends MMB_Core
         if (class_exists('Language_Pack_Upgrader')) {
             /** @handled class */
             $upgrader = new Language_Pack_Upgrader(mwp_container()->getUpdaterSkin());
-            $result = $upgrader->bulk_upgrade();
+            $result   = $upgrader->bulk_upgrade();
 
             if (!empty($result)) {
                 $return = 1;
-                foreach ($result as $translate_tmp => $translate_info) {
-                    if (is_wp_error($translate_info) || empty($translate_info)) {
-                        $return = $this->mmb_get_error($translate_info);
-                        break;
+
+                if (is_array($result)) {
+                    foreach ($result as $translate_tmp => $translate_info) {
+                        if (is_wp_error($translate_info) || empty($translate_info)) {
+                            $return = $this->mmb_get_error($translate_info);
+                            break;
+                        }
                     }
                 }
 

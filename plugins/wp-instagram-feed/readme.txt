@@ -2,8 +2,8 @@
 Contributors: arrowplugins,mutiullah
 Tags: Instagram feed, Instagram feed for wordpress, Instagram photos, Custom Instagram Feed, responsive Instagram, mobile Instagram, Instagram wall, Instagram gallery, Instagram galleries, Instagram widget, beautiful Instagram
 Requires at least: 4.0
-Tested up to: 4.7
-Stable tag: 1.2
+Tested up to: 4.9
+Stable tag: 1.2.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -121,6 +121,15 @@ A. To show Instagram Feed in your Widget Area, go into your Widgets and find the
 
 == Changelog ==
 
+= 1.2.2 =
+
+* Some bugs fixed
+
+= 1.2.1 =
+
+* Fixed the issue where date doesn't hide
+
+
 = 1.2 =
 
 * Fixed the Instagram Token Issue
@@ -128,8 +137,6 @@ A. To show Instagram Feed in your Widget Area, go into your Widgets and find the
 * Fixed the issue where buttons doesn't auto select while adding new feed
 
 * Fixed the Checkbox selection
-
-* Fixed the issue where date doesn't hide
 
 * Fixed Default Template Selection
 

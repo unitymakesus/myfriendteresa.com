@@ -93,10 +93,26 @@ class MWP_Action_GetState extends MWP_Action_Abstract
     protected function getUsers(array $options = array())
     {
         $userQuery = $this->container->getUserQuery();
+        $users     = $userQuery->query($options);
 
-        $users = $userQuery->query($options);
+        if (function_exists('is_main_site') && is_main_site()) {
+            $this->includeAllSuperAdmins($users);
+        }
 
         return $users;
+    }
+
+    private function includeAllSuperAdmins(array &$users)
+    {
+        foreach (get_super_admins() as $superAdminUsername) {
+            foreach ($users as &$user) {
+                if ($user['username'] !== $superAdminUsername || $user['roles'] !== false) {
+                    continue;
+                }
+                $user['roles'] = array('administrator' => true);
+                break;
+            }
+        }
     }
 
     protected function getPosts(array $options = array())
@@ -148,13 +164,17 @@ class MWP_Action_GetState extends MWP_Action_Abstract
 
         if ($options['fetchAutoUpdate']) {
             foreach ($plugins as &$plugin) {
-                $plugin['autoUpdate'] = $autoUpdateManager->isEnabledForPlugin($plugin['slug']);
+                $plugin['autoUpdate'] = isset($plugin['slug']) ? $autoUpdateManager->isEnabledForPlugin($plugin['slug']) : false;
             }
         }
 
         if ($options['fetchAvailableUpdate']) {
             $um = $this->container->getUpdateManager();
             foreach ($plugins as &$plugin) {
+                if (!isset($plugin['basename'])) {
+                    continue;
+                }
+
                 $update = $um->getPluginUpdate($plugin['basename']);
                 if ($update !== null) {
                     $plugin['updateVersion'] = $update->version;
@@ -196,6 +216,10 @@ class MWP_Action_GetState extends MWP_Action_Abstract
         if ($options['fetchAvailableUpdate']) {
             $um = $this->container->getUpdateManager();
             foreach ($themes as &$theme) {
+                if (!isset($theme['slug'])) {
+                    continue;
+                }
+
                 $update = $um->getThemeUpdate($theme['slug']);
                 if ($update !== null) {
                     $theme['updateVersion'] = $update->version;

@@ -5,18 +5,24 @@ Plugin URI: https://wordpress.org/plugins/wp-instagram-feed/
 Description: Add Responsive Instgram Feed into your Posts, Pages & Widgets
 Author: Arrow Plugins
 Author URI: https://www.arrowplugins.com
-Version: 1.2
+Version: 1.2.3
 License: GplV2
 Copyright: 2017 Arrow Plugins
 */
+
+
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 define( 'IFBA_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
 include_once('includes/ifba-post-type.php');
 include_once('includes/ifba-custom-columns.php');
 include_once('includes/ifba-post-meta-boxes.php');
+
+
 include_once('includes/ifba-save-post.php');
 include_once('includes/ifba-shortcode.php');
 include_once('includes/ifba-enqueue-scripts.php');
+
+
 
 
 

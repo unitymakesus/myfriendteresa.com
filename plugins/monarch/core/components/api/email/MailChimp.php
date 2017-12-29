@@ -162,40 +162,48 @@ class ET_Core_API_Email_MailChimp extends ET_Core_API_Email_Provider {
 		return parent::get_data_keymap( $keymap, $custom_fields_key );
 	}
 
+	public function get_subscriber( $list_id, $email ) {
+		$hash = md5( strtolower( $email ) );
+		$this->prepare_request( implode( '/', array( $this->BASE_URL, 'lists', $list_id, 'members', $hash ) ) );
+		$this->make_remote_request();
+
+		return $this->response->STATUS_CODE !== 200 ? null : $this->response->DATA;
+	}
+
 	/**
 	 * @inheritDoc
 	 */
 	public function subscribe( $args, $url = '' ) {
 		$dbl_optin = empty( $args['dbl_optin'] );
 		$list_id   = $args['list_id'];
-		$url       = "{$this->BASE_URL}/lists/{$list_id}/members";
 		$args      = $this->transform_data_to_provider_format( $args, 'subscriber' );
+		$url       = "{$this->BASE_URL}/lists/{$list_id}/members";
+		$email     = $args['email_address'];
+		$err       = esc_html__( 'An error occurred, please try later.', 'et_core' );
 
 		$args['ip_signup'] = et_core_get_ip_address();
 		$args['status']    = $dbl_optin ? 'pending' : 'subscribed';
 
 		$this->prepare_request( $url, 'POST', false, $args, true );
-
 		$result = parent::subscribe( $args, $url );
 
-		if ( 'success' === $result ) {
-			$this->_add_note_to_subscriber( $args['email_address'], $url );
-		}
-
-		// Try updating the list data and subscribe to a new list if subscriber already exists
-
 		if ( false !== stripos( $result, 'already a list member' ) ) {
-			$md_5_email = md5( $args['email_address'] );
-			$url        = "{$this->BASE_URL}/lists/{$list_id}/members/{$md_5_email}";
+			$user   = $this->get_subscriber( $list_id, $email );
+			$result = $user ? 'success' : $err;
 
-			$this->prepare_request( $url, 'PUT', false, $args, true );
-
-			$result = parent::subscribe( $args, $url );
+			if ( $user && $user['status'] !== 'subscribed' ) {
+				$this->prepare_request( implode( '/', array( $url, $user['id'] ) ), 'PUT', false, $args, true );
+				$result = parent::subscribe( $args, $url );
+			}
 		}
 
-		if ( false !== stripos( $result, 'has signed up to a lot of lists ' ) ) {
+		if ( 'success' === $result ) {
+			$this->_add_note_to_subscriber( $email, $url );
+		} else if ( false !== stripos( $result, 'has signed up to a lot of lists ' ) ) {
 			// return message which can be translated. Generic Mailchimp messages are not translatable.
-			return esc_html__( 'You have signed up to a lot of lists very recently, please try again later', 'et_core' );
+			$result = esc_html__( 'You have signed up to a lot of lists very recently, please try again later', 'et_core' );
+		} else {
+			$result = $err;
 		}
 
 		return $result;

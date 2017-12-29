@@ -69,7 +69,7 @@ class MWP_EventListener_MasterRequest_SetRequestSettings implements Symfony_Even
         }
 
         $context->setConstant('WP_ADMIN', true);
-        $context->setConstant('WP_NETWORK_ADMIN', false);
+        $context->isMultisite() ? $context->setConstant('WP_NETWORK_ADMIN', true) : $context->setConstant('WP_NETWORK_ADMIN', false);
         $context->setConstant('WP_USER_ADMIN', false);
         $context->setConstant('WP_BLOG_ADMIN', true);
         $context->addAction('wp_loaded', array($this, 'adminWpLoaded'), MAX_PRIORITY_HOOK - 1);
@@ -97,6 +97,9 @@ class MWP_EventListener_MasterRequest_SetRequestSettings implements Symfony_Even
 
         /** @handled function */
         wp_update_plugins();
+
+        /** @handled function */
+        wp_update_themes();
 
         array_pop($wp_current_filter);
 

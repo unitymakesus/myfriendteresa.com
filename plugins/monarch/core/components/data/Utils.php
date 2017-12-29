@@ -11,6 +11,8 @@
  */
 class ET_Core_Data_Utils {
 
+	private static $_instance;
+
 	/**
 	 * Generate an XML-RPC array.
 	 *
@@ -120,6 +122,23 @@ class ET_Core_Data_Utils {
 		return $result;
 	}
 
+	private function _remove_empty_directories( $path ) {
+		if ( ! is_dir( $path ) ) {
+			return false;
+		}
+
+		$empty              = true;
+		$directory_contents = glob( untrailingslashit( $path ) . '/*' );
+
+		foreach ( (array) $directory_contents as $item ) {
+			if ( ! $this->_remove_empty_directories( $item ) ) {
+				$empty = false;
+			}
+		}
+
+		return $empty ? @rmdir( $path ) : false;
+	}
+
 	/**
 	 * Returns `true` if all values in `$array` are not empty, `false` otherwise.
 	 * If `$condition` is provided then values are checked against it instead of `empty()`.
@@ -152,30 +171,67 @@ class ET_Core_Data_Utils {
 	 *
 	 * @param array  $array   An array which contains value located at `$address`.
 	 * @param string $address The location of the value within `$array` (dot notation).
+	 * @param mixed  $default Value to return if not found. Default is an empty string.
 	 *
-	 * @return array {
-	 *     Result Array - will be empty if no value was found.
-	 *
-	 *     @type mixed $value The value found in `$array` at `$address`.
-	 * }
+	 * @return mixed The value, if found, otherwise $default.
 	 */
-	public function get_array_value_at_address( $array, $address ) {
+	public function array_get( $array, $address, $default = '' ) {
 		$keys   = explode( '.', $address );
-		$result = array();
 		$value  = $array;
 
 		while ( $key = array_shift( $keys ) ) {
-			if ( isset( $value[ $key ] ) ) {
-				$value = $value[ $key ];
-				continue;
+			if ( '[' === $key[0] && is_numeric( substr( $key, 1, -1 ) ) ) {
+				$key = (int) $key;
 			}
+
+			if ( ! isset( $value[ $key ] ) ) {
+				return $default;
+			}
+
+			$value = $value[ $key ];
 		}
 
-		if ( $value !== $array ) {
-			$result['value'] = $value;
+		return $value;
+	}
+
+	/**
+	 * Sets a value in a nested array using an address string (dot notation)
+	 *
+	 * @see http://stackoverflow.com/a/9628276/419887
+	 *
+	 * @param array        $array The array to modify
+	 * @param string|array $path  The path in the array
+	 * @param mixed        $value The value to set
+	 */
+	public function array_set( &$array, $path, &$value ) {
+		$path_parts = is_array( $path ) ? $path : explode( '.', $path );
+		$current    = &$array;
+
+		foreach ( $path_parts as $key ) {
+			if ( ! is_array( $current ) ) {
+				$current = array();
+			}
+
+			if ( '[' === $key[0] && is_numeric( substr( $key, 1, - 1 ) ) ) {
+				$key = (int) $key;
+			}
+
+			$current = &$current[ $key ];
 		}
 
-		return $result;
+		$current = $value;
+	}
+
+	public function ensure_directory_exists( $path ) {
+		return file_exists( $path ) ? true : @mkdir( $path, 0755, true );
+	}
+
+	public static function instance() {
+		if ( ! self::$_instance ) {
+			self::$_instance = new ET_Core_Data_Utils();
+		}
+
+		return self::$_instance;
 	}
 
 	/**
@@ -186,7 +242,7 @@ class ET_Core_Data_Utils {
 	 * @return bool
 	 */
 	public function is_assoc_array( $array ) {
-		return count( array_filter( array_keys( $array ), 'is_string' ) ) > 0;
+		return is_array( $array ) && count( array_filter( array_keys( $array ), 'is_string' ) ) > 0;
 	}
 
 	/**
@@ -198,6 +254,19 @@ class ET_Core_Data_Utils {
 	 */
 	public function is_xmlrpc_error( $value ) {
 		return is_object( $value ) && isset( $value->faultCode );
+	}
+
+	/**
+	 * Replaces any Windows style directory separators in $path with Linux style separators.
+	 * Windows actually supports both styles, even mixed together. However, its better not
+	 * to mix them (especially when doing string comparisons on paths).
+	 *
+	 * @param string $path
+	 *
+	 * @return string
+	 */
+	public function normalize_path( $path ) {
+		return $path ? str_replace( '\\', '/', $path ) : '';
 	}
 
 	/**
@@ -262,27 +331,34 @@ class ET_Core_Data_Utils {
 	}
 
 	/**
-	 * Sets a value in a nested array using an address string (dot notation)
+	 * Removes empty directories recursively starting at and (possibly) including `$path`. `$path` must be
+	 * an absolute path located under {@see WP_CONTENT_DIR}. Current user must have 'manage_options'
+	 * capability. If the path or permissions check fails, no directories will be removed.
 	 *
-	 * @see http://stackoverflow.com/a/9628276/419887
-	 *
-	 * @param array  $array The array to modify
-	 * @param string $path  The path in the array
-	 * @param mixed  $value The value to set
+	 * @param string $path Absolute path to parent directory.
 	 */
-	public function set_array_value_at_address( &$array, $path, &$value ) {
-		$path_parts = explode( '.', $path );
-		$current    = &$array;
+	function remove_empty_directories( $path ) {
+		$path = realpath( $path );
 
-		foreach ( $path_parts as $key ) {
-			if ( ! is_array( $current ) ) {
-				$current = array();
-			}
-
-			$current = &$current[ $key ];
+		if ( empty( $path ) ) {
+			// $path doesn't exist
+			return;
 		}
 
-		$current = $value;
+		$path        = $this->normalize_path( $path );
+		$content_dir = $this->normalize_path( WP_CONTENT_DIR );
+
+		if ( 0 !== strpos( $path, $content_dir ) || $content_dir === $path ) {
+			return;
+		}
+
+		$capability = 0 === strpos( $path, "{$content_dir}/cache/et" ) ? 'edit_posts' : 'manage_options';
+
+		if ( ! wp_doing_cron() && ! et_core_security_check_passed( $capability ) ) {
+			return;
+		}
+
+		$this->_remove_empty_directories( $path );
 	}
 
 	/**
@@ -310,20 +386,18 @@ class ET_Core_Data_Utils {
 				continue;
 			}
 
-			$value = $this->get_array_value_at_address( $from_data, $from_address );
+			$value = $this->array_get( $from_data, $from_address, null );
 
-			if ( ! isset( $value['value'] ) ) {
+			if ( null === $value ) {
 				// Unknown key, skip it.
 				continue;
 			}
-
-			$value = $value['value'];
 
 			if ( $array_value_required && ! is_array( $value ) ) {
 				$value = array( $value );
 			}
 
-			$this->set_array_value_at_address( $to_data, $to_address, $value );
+			$this->array_set( $to_data, $to_address, $value );
 		}
 
 		return $to_data;
@@ -345,4 +419,51 @@ class ET_Core_Data_Utils {
 		return json_decode( $json, true );
 	}
 
+}
+
+
+function et_core_data_utils_minify_css( $string = '' ) {
+	$comments = <<< EOS
+(?sx)
+	# don't change anything inside of quotes
+	( "(?:[^"\\\]++|\\\.)*+" | '(?:[^'\\\]++|\\\.)*+' )
+|
+	# comments
+	/\* (?> .*? \*/ )
+EOS;
+
+	$everything_else = <<< EOS
+(?six)
+	# don't change anything inside of quotes
+	( "(?:[^"\\\]++|\\\.)*+" | '(?:[^'\\\]++|\\\.)*+' )
+|
+	# spaces before and after ; and }
+	\s*+ ; \s*+ ( } ) \s*+
+|
+	# all spaces around meta chars/operators (excluding + and -)
+	\s*+ ( [*$~^|]?+= | [{};,>~] | !important\b ) \s*+
+|
+	# all spaces around + and - (in selectors only!)
+	\s*([+-])\s*(?=[^}]*{)
+|
+	# spaces right of ( [ :
+	( [[(:] ) \s++
+|
+	# spaces left of ) ]
+	\s++ ( [])] )
+|
+	# spaces left (and right) of : (but not in selectors)!
+	\s+(:)(?![^\}]*\{)
+|
+	# spaces at beginning/end of string
+	^ \s++ | \s++ \z
+|
+	# double spaces to single
+	(\s)\s+
+EOS;
+
+	$search_patterns  = array( "%{$comments}%", "%{$everything_else}%" );
+	$replace_patterns = array( '$1', '$1$2$3$4$5$6$7' );
+
+	return preg_replace( $search_patterns, $replace_patterns, $string );
 }
